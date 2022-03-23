@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{.Name}}</title>
+	</head>
+	<body>
+    <h1 class="document-title">{{.Name}}</h1>
+    {{with .Preambel}}<p class="document-preambel">
+      {{ . }}
+    </p>
+		{{range .Sections}}<section class="section">
+      <h2 class="section-title">
+        {{.Heading}}
+      </h2>
+      {{with .Preambel}}<p class="section-preambel">
+        {{ . }}
+      </p>
+      {{range .Paragraphs}}<p class="paragraph">
+        {{ . }}
+      </p>
+    </section>{{end}}
+	</body>
+</html>

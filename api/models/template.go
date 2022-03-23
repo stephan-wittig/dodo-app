@@ -5,6 +5,11 @@ import (
 	"stephan-wittig/dodo/utils"
 )
 
+// Global variable holding the template used for everything
+//
+// TODO: Remove this and retrieve templates instead
+var DemoTemplate *DocumentTemplate
+
 // optionalElement composes the common attributes for optional document part templates
 type optionalElement struct {
 	Optional    bool   `xml:"optional,attr"` // If Optional = true, Description and Key must be set
@@ -35,7 +40,8 @@ type sectionTemplate struct {
 }
 
 type paragraphTemplate struct {
-	Label string `xml:"label,attr"` // Mandatory for optional paragraphs
+	Label    string `xml:"label,attr"` // Mandatory for optional paragraphs
+	Verbatim string `xml:"Verbatim"`
 
 	StringVariables []stringVariable `xml:"StringVariable"`
 	NumberVariables []numberVariable `xml:"NumberVariable"`
@@ -50,11 +56,12 @@ type paragraphTemplate struct {
 //
 // The 2D2L XML Schema is used to validate the input.
 // On error, this returns the error AND a DocumentTemplate which might be invalid
-func Parse2d2lDocumentTemplate(data []byte) (DocumentTemplate, error) {
+func Parse2d2lDocumentTemplate(data []byte) (*DocumentTemplate, error) {
 	newTemplate := DocumentTemplate{}
 	trimmedData := utils.TrimNewLines(data)
 	err := xml.Unmarshal(trimmedData, &newTemplate)
-	return newTemplate, err
+	DemoTemplate = &newTemplate
+	return &newTemplate, err
 }
 
 // Methods
@@ -100,4 +107,42 @@ func (tmpl *DocumentTemplate) CreateInstructionSet() InstructionSet {
 		Elements:        elements,
 		Variables:       variables,
 	}
+}
+
+// ReplaceAllVariables replaces global and local variables
+func (p *paragraphTemplate) replaceAllVariables(i InstructionSet) (string, error) {
+	copy := p.Verbatim
+
+	// First, replace locals
+	for _, v := range p.StringVariables {
+		ins, _ := i.Variables[v.Key]
+		newCopy, err := replaceVariable(copy, v, ins.Value)
+		if err != nil {
+			return "", err
+		}
+		copy = newCopy
+	}
+
+	for _, v := range p.NumberVariables {
+		ins, _ := i.Variables[v.Key]
+		newCopy, err := replaceVariable(copy, v, ins.Value)
+		if err != nil {
+			return "", err
+		}
+		copy = newCopy
+	}
+
+	for _, v := range p.ChoiceVariables {
+		ins, _ := i.Variables[v.Key]
+		newCopy, err := replaceVariable(copy, v, ins.Value)
+		if err != nil {
+			return "", err
+		}
+		copy = newCopy
+	}
+
+	// Then, replace Globals
+	copy = replaceGlobalVariables(copy)
+
+	return copy, nil
 }

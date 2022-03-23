@@ -5,7 +5,7 @@ package models
 // The actual document ("verbatim") as well as the instructions are included.
 type Document struct {
 	Id     string           `json:"id,omitempty"`     // For stored documents only; UUID
-	Digest []byte           `json:"digest"`           // MD5 of InstructionSet
+	Digest [16]byte         `json:"digest"`           // MD5 of InstructionSet
 	Valid  bool             `json:"valid"`            // If false, see errors for details
 	Errors map[string]error `json:"errors,omitempty"` // Map of key => error
 
@@ -23,4 +23,26 @@ type Document struct {
 	Verbatim []byte `json:"verbatim,omitempty"`
 
 	InstructionSet
+}
+
+// intermediateDocument is an intermediate step between template and document
+//
+// Variables are already evaluated here
+type intermediateDocument struct {
+	Name     string
+	Preambel string
+	Sections []intermediateSection
+}
+
+// intermediatSection is an intermediate step between sectionTeomplate and document
+//
+// Variables are already evaluated here
+type intermediateSection struct {
+	Heading    string
+	Preambel   string
+	Paragraphs []string
+}
+
+func (doc *intermediateDocument) GenerateVerbatim() ([]byte, error) {
+	return []byte{}, nil
 }

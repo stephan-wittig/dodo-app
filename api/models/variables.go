@@ -1,11 +1,28 @@
 package models
 
-// Instructive is the interface that should be implemented by all variables
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+	"text/template"
+)
+
+// globalVariables holds the global variables. This should be retrieved from somewhere.
+// HTML should already be escaped
+var globalVariables = map[string]string{}
+
+// olThreshhold is a list with choices that are longer than this will be rendered as ol
+var olThreshhold = 30
+
+// AnyVariable is the interface that should be implemented by all variables
 // it makes sure that they can be turned into serialisable intsructions
-type Instructive interface {
-	// ToInstructions should return key and instruction
+type AnyVariable interface {
 	ToInstructions() variableInstruction
 	GetKey() string
+	// Evaluates turns the input data into a string fitting the format. HTML is escaped here
+	Evaluate([]byte) (string, error)
 }
 
 // variable composes the common attributes for all variables
@@ -60,6 +77,14 @@ func (v stringVariable) GetKey() string {
 	return v.Key
 }
 
+func (v stringVariable) Evaluate(value []byte) (string, error) {
+	if value == nil {
+		return "___", nil
+	}
+
+	return template.HTMLEscapeString(string(value)), nil
+}
+
 func (v numberVariable) ToInstructions() variableInstruction {
 	return variableInstruction{
 		DataType:    "NUMBER",
@@ -74,6 +99,23 @@ func (v numberVariable) GetKey() string {
 	return v.Key
 }
 
+func (v numberVariable) Evaluate(value []byte) (string, error) {
+	if value == nil {
+		return "___", nil
+	}
+
+	num, err := strconv.ParseFloat(string(value), 64)
+	if err != nil {
+		return "", err
+	}
+
+	if math.Mod(v.Step, 1) == 0 {
+		return fmt.Sprintf("%.f", num), nil
+	}
+
+	return fmt.Sprintf("%f", num), nil
+}
+
 func (v choiceVariable) ToInstructions() variableInstruction {
 	return variableInstruction{
 		DataType:    "CHOICE",
@@ -86,4 +128,83 @@ func (v choiceVariable) ToInstructions() variableInstruction {
 
 func (v choiceVariable) GetKey() string {
 	return v.Key
+}
+
+func (v choiceVariable) Evaluate(value []byte) (string, error) {
+	if value == nil {
+		return "___", nil
+	}
+
+	var choices []int64
+	if err := json.Unmarshal(value, &choices); err != nil {
+		return "", err
+	}
+
+	choicesVerbatim := []string{}
+	for _, choice := range choices {
+		choicesVerbatim = append(choicesVerbatim, v.Options[choice].Value)
+	}
+
+	sliceLen := len(choices)
+
+	if sliceLen == 1 {
+		return choicesVerbatim[0], nil
+	}
+
+	maxChoiceLen := 0
+
+	for _, choice := range choicesVerbatim {
+		choiceLen := len(choice)
+		if choiceLen > maxChoiceLen {
+			maxChoiceLen = choiceLen
+		}
+	}
+
+	items := ""
+
+	if maxChoiceLen > olThreshhold {
+		for _, choice := range choicesVerbatim {
+			items = items + fmt.Sprintf(
+				"<li>%s</li>\n",
+				choice,
+			)
+		}
+		return fmt.Sprintf("\n<ol>\n%s</ol>\n", items), nil
+	}
+
+	for i, choice := range choicesVerbatim {
+		items = items + fmt.Sprintf(
+			"(%d)\u00A0%s", // 00A0 = non-breaking space
+			i+1,
+			choice,
+		)
+	}
+	return strings.TrimSpace(items), nil
+}
+
+func replaceVariable(verbatimTemplate string, variable AnyVariable, value []byte) (string, error) {
+	new, err := variable.Evaluate(value)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.Replace(
+		verbatimTemplate,
+		fmt.Sprintf("${%s}", variable.GetKey()),
+		string(new),
+		-1,
+	), err
+}
+
+func replaceGlobalVariables(verbatimTemplate string) string {
+	copy := verbatimTemplate
+	for k, v := range globalVariables {
+		copy = strings.Replace(
+			copy,
+			fmt.Sprintf("${{%s}}", k),
+			v,
+			-1,
+		)
+	}
+	return copy
 }

@@ -10,48 +10,9 @@ import (
 )
 
 func main() {
-	err := os.Chdir("../demo")
+	data, err := open2d2lFile()
 	if err != nil {
-		log.Fatal("Changing WD failed:", err)
-	}
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal("Opening WD failed:", err)
-	}
-
-	dir := os.DirFS("../demo")
-	files, err := fs.Glob(dir, "*.2d2l")
-	if err != nil {
-		log.Fatal("Using glob failed:", err)
-	}
-	if files == nil {
-		log.Fatal("No template definition found")
-	}
-
-	var file string
-	numOfFiles := len(files)
-	if numOfFiles == 1 {
-		file = fmt.Sprintf("%s\\%s", wd, files[0])
-	} else {
-		var selection int
-		fmt.Printf("Found %d template definitions. Please choose one.", numOfFiles)
-		for i, f := range files {
-			fmt.Printf("%2d: %s", i, f)
-		}
-
-		_, err := fmt.Scan(&selection)
-		if err != nil {
-			log.Fatal("Could not read input:", err)
-		}
-		if selection >= numOfFiles {
-			log.Fatal("Could not read input:", err)
-		}
-		file = fmt.Sprintf("%s\\%s", wd, files[selection])
-	}
-
-	data, err := os.ReadFile(file)
-	if err != nil {
-		log.Fatal("Couldn't read file:", err)
+		log.Fatal(err)
 	}
 
 	template, err := models.Parse2d2lDocumentTemplate(data)
@@ -69,4 +30,51 @@ func main() {
 	fmt.Printf("Parsed template successfully!\n%s\n", instructionsJson)
 
 	log.Println("Done")
+}
+
+func open2d2lFile() ([]byte, error) {
+	err := os.Chdir("../demo")
+	if err != nil {
+		return []byte{}, fmt.Errorf("Changing WD failed: %s", err)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return []byte{}, fmt.Errorf("Opening WD failed: %s", err)
+	}
+
+	dir := os.DirFS("../demo")
+	files, err := fs.Glob(dir, "*.2d2l")
+	if err != nil {
+		return []byte{}, fmt.Errorf("Using glob failed: %s", err)
+	}
+	if files == nil {
+		return []byte{}, fmt.Errorf("No template definition found in ../demo")
+	}
+
+	var file string
+	numOfFiles := len(files)
+	if numOfFiles == 1 {
+		file = fmt.Sprintf("%s\\%s", wd, files[0])
+	} else {
+		var selection int
+		fmt.Printf("Found %d template definitions. Please choose one.\n", numOfFiles)
+		for i, f := range files {
+			fmt.Printf("  %2d: %s\n", i, f)
+		}
+
+		_, err := fmt.Scan(&selection)
+		if err != nil {
+			return []byte{}, fmt.Errorf("Could not read input: %s", err)
+		}
+		if selection >= numOfFiles {
+			return []byte{}, fmt.Errorf("Could not use input: Out of bounds")
+		}
+		file = fmt.Sprintf("%s\\%s", wd, files[selection])
+	}
+
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return []byte{}, fmt.Errorf("Couldn't read file: %s", err)
+	}
+	return data, nil
 }
