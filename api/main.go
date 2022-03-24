@@ -3,78 +3,69 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"stephan-wittig/dodo/models"
+	"stephan-wittig/dodo/utils"
 )
 
 func main() {
-	data, err := open2d2lFile()
+	templateData, err := utils.OpenFile("../demo", "*.dod")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	template, err := models.Parse2d2lDocumentTemplate(data)
+	// Must be parsed to be stored in memory
+	tmp, err := models.ParseDodDocumentTemplate(templateData)
 	if err != nil {
 		log.Fatal("Couldn't parse template:", err)
 	}
+	log.Println("Parsed template successfully!")
 
-	instructions := template.CreateInstructionSet()
+	fmt.Println("Do you want to (1) create instructions for the template or (2) generate a document from values?")
 
-	instructionsJson, err := json.Marshal(instructions)
-	if err != nil {
-		log.Fatal("Couldn't stringify instructions:", err)
+	var selection int64
+	if _, err = fmt.Scan(&selection); err != nil {
+		log.Fatalf("Could not read input: %s", err)
+	}
+	if selection > 2 || selection < 1 {
+		log.Fatal("Could not read input: out of bounds")
 	}
 
-	fmt.Printf("Parsed template successfully!\n%s\n", instructionsJson)
+	if selection == 1 {
+		instructions := tmp.CreateInstructionSet()
+
+		instructionsJson, err := json.MarshalIndent(instructions, "", "  ")
+		if err != nil {
+			log.Fatal("Couldn't stringify instructions:", err)
+		}
+
+		// Save to file
+		os.WriteFile(fmt.Sprintf("../demo/instructions_%s.json", tmp.Name), instructionsJson, os.ModePerm)
+	}
+
+	if selection == 2 {
+		instructionsData, err := utils.OpenFile("../demo", "input.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		instructions, err := models.ParseJsonInstructionSet(instructionsData)
+		if err != nil {
+			log.Fatal("Couldn't parse instructions:", err)
+		}
+		log.Println("Parsed instructions successfully!")
+
+		document, err := instructions.CreateDocument()
+		if err != nil {
+			log.Fatal("Couldn't generate document:", err)
+		}
+		log.Println("Created document sucessfully")
+
+		fmt.Printf("Computed instructions hash:%x\n", document.Digest)
+		// save to file
+		os.WriteFile(fmt.Sprintf("../demo/%s.html", tmp.Name), document.Verbatim, os.ModePerm)
+	}
 
 	log.Println("Done")
-}
-
-func open2d2lFile() ([]byte, error) {
-	err := os.Chdir("../demo")
-	if err != nil {
-		return []byte{}, fmt.Errorf("Changing WD failed: %s", err)
-	}
-	wd, err := os.Getwd()
-	if err != nil {
-		return []byte{}, fmt.Errorf("Opening WD failed: %s", err)
-	}
-
-	dir := os.DirFS("../demo")
-	files, err := fs.Glob(dir, "*.2d2l")
-	if err != nil {
-		return []byte{}, fmt.Errorf("Using glob failed: %s", err)
-	}
-	if files == nil {
-		return []byte{}, fmt.Errorf("No template definition found in ../demo")
-	}
-
-	var file string
-	numOfFiles := len(files)
-	if numOfFiles == 1 {
-		file = fmt.Sprintf("%s\\%s", wd, files[0])
-	} else {
-		var selection int
-		fmt.Printf("Found %d template definitions. Please choose one.\n", numOfFiles)
-		for i, f := range files {
-			fmt.Printf("  %2d: %s\n", i, f)
-		}
-
-		_, err := fmt.Scan(&selection)
-		if err != nil {
-			return []byte{}, fmt.Errorf("Could not read input: %s", err)
-		}
-		if selection >= numOfFiles {
-			return []byte{}, fmt.Errorf("Could not use input: Out of bounds")
-		}
-		file = fmt.Sprintf("%s\\%s", wd, files[selection])
-	}
-
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return []byte{}, fmt.Errorf("Couldn't read file: %s", err)
-	}
-	return data, nil
 }

@@ -52,11 +52,11 @@ type paragraphTemplate struct {
 
 // Constructors
 
-// ParseDocumentTemplate reads 2D2L data to construct a DocumentTemplate
+// ParseDocumentTemplate reads Dod data to construct a DocumentTemplate
 //
-// The 2D2L XML Schema is used to validate the input.
+// The Dod XML Schema is used to validate the input.
 // On error, this returns the error AND a DocumentTemplate which might be invalid
-func Parse2d2lDocumentTemplate(data []byte) (*DocumentTemplate, error) {
+func ParseDodDocumentTemplate(data []byte) (*DocumentTemplate, error) {
 	newTemplate := DocumentTemplate{}
 	trimmedData := utils.TrimNewLines(data)
 	err := xml.Unmarshal(trimmedData, &newTemplate)
@@ -69,16 +69,16 @@ func Parse2d2lDocumentTemplate(data []byte) (*DocumentTemplate, error) {
 // CreateInstructionSet creates an InstructionSet for a given DocumentTemplate
 func (tmpl *DocumentTemplate) CreateInstructionSet() InstructionSet {
 	variables := map[string]variableInstruction{}
-	elements := map[string]bool{}
+	elements := map[string]string{}
 
 	for _, sec := range tmpl.Sections {
 		if sec.Optional {
-			elements[sec.Key] = true
+			elements[sec.Key] = sec.Heading
 		}
 
 		for _, par := range sec.Paragraphs {
 			if par.Optional {
-				elements[par.Key] = true
+				elements[par.Key] = par.Label
 			}
 
 			if par.StringVariables != nil {
@@ -141,7 +141,7 @@ func (p *paragraphTemplate) replaceAllVariables(i InstructionSet) (string, error
 		copy = newCopy
 	}
 
-	// Then, replace Globals
+	// Then, replace globals
 	copy = replaceGlobalVariables(copy)
 
 	return copy, nil

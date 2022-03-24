@@ -9,7 +9,7 @@
 >
   <Preambel>
     This policy constitutes an addendum to the employment contract between ${{company-full-name}}
-    (hereafter ${{company-short-name}}) and its employees. It becomes active on ${{active-from}}.
+    (hereafter "${{company-short-name}}") and its employees. It becomes active on ${{active-from}}.
   </Preambel>
 
   <SectionTemplate
@@ -21,7 +21,7 @@
     >
       <ChoiceVariable
         key="event"
-        description="Should adoptions be covered as well?"
+        label="Should adoptions be covered as well?"
         maxChoices="1"
       >
         <Option label="No">
@@ -32,13 +32,12 @@
         </Option>
       </ChoiceVariable>
       <NumberVariable
-        min="15"
         key="days-of-leave"
         label="Days of leave granted"
         description="Women must take at least to... (see law §3...)"
       />
       <Verbatim>
-        All permanent employees can decide to take parental leave. The government offers x days of leave. On top of that, employees can take x additional days of leave ${event}.
+        All permanent employees can decide to take parental leave. The UK government offers 30 days of leave. On top of that, employees can take ${days-of-leave} additional days of leave ${event}.
       </Verbatim>
     </ParagraphTemplate>
     <ParagraphTemplate
@@ -46,7 +45,7 @@
     >
       <ChoiceVariable
         key="partnership-status"
-        descriptions="What kind of partners should be covered?"
+        label="What kind of partners should be covered?"
       >
         <!-- Some of these could be mandatory but this is for demonstration of multiple choices -->
         <Option>
@@ -70,7 +69,7 @@
     optional="false"
   >
     <Preambel>
-      Provisions in this section control the erelationship between ${{company-short-name}} and employees
+      Provisions in this section control the relationship between ${{company-short-name}} and employees
       that are on parental leave.
     </Preambel>
     <ParagraphTemplate
@@ -79,7 +78,7 @@
       <NumberVariable
         min="60"
         key="compensation-percent"
-        description="Share of salary during parental leave"
+        label="Share of salary during parental leave"
       />
       <Verbatim>
         During their parental leave, ${{company-short-name}} will continue to pay ${compensation-percent}% of
@@ -89,7 +88,8 @@
     </ParagraphTemplate>
     <ParagraphTemplate
       optional="true"
-      description="Discretionary-bonus clause"
+      key="p/bonus"
+      label="Discretionary-bonus clause"
     >
       <Verbatim>
         The potential range for any discretionary bonuses will not be affected by parental leave.
@@ -97,15 +97,18 @@
     </ParagraphTemplate>
     <ParagraphTemplate
       optional="true"
-      description="No-access clause"
-    />
+      key="p/access"
+      label="No-access clause"
+    >
       <StringVariable
-        description="Name or role of contact during leave"
+        label="Name or role of contact during leave"
         key="contact"
-      >
+      />
+      <Verbatim>
         The employee's access to all systems will be blocked during their parental leave. The primary contact
         during leave is ${contact}.
-      </StringVariable>
+      </Verbatim>
+    </ParagraphTemplate>
   </SectionTemplate>
 
 </DocumentTemplate>

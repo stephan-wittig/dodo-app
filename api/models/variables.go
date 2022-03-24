@@ -11,7 +11,11 @@ import (
 
 // globalVariables holds the global variables. This should be retrieved from somewhere.
 // HTML should already be escaped
-var globalVariables = map[string]string{}
+var globalVariables = map[string]string{
+	"company-full-name":  "Shiny App LLC",
+	"company-short-name": "Shiny App",
+	"active-from":        "April 1st 2022",
+}
 
 // olThreshhold is a list with choices that are longer than this will be rendered as ol
 var olThreshhold = 30
@@ -67,6 +71,7 @@ type choiceOption struct {
 func (v stringVariable) ToInstructions() variableInstruction {
 	return variableInstruction{
 		DataType:    "STRING",
+		Label:       v.Label,
 		Description: v.Description,
 		Min:         v.MinLength,
 		Max:         v.MaxLength,
@@ -88,6 +93,7 @@ func (v stringVariable) Evaluate(value []byte) (string, error) {
 func (v numberVariable) ToInstructions() variableInstruction {
 	return variableInstruction{
 		DataType:    "NUMBER",
+		Label:       v.Label,
 		Description: v.Description,
 		Min:         v.Min,
 		Max:         v.Max,
@@ -119,6 +125,7 @@ func (v numberVariable) Evaluate(value []byte) (string, error) {
 func (v choiceVariable) ToInstructions() variableInstruction {
 	return variableInstruction{
 		DataType:    "CHOICE",
+		Label:       v.Label,
 		Description: v.Description,
 		Min:         v.MinChoices,
 		Max:         v.MaxChoices,
@@ -174,7 +181,7 @@ func (v choiceVariable) Evaluate(value []byte) (string, error) {
 
 	for i, choice := range choicesVerbatim {
 		items = items + fmt.Sprintf(
-			"(%d)\u00A0%s", // 00A0 = non-breaking space
+			"(%d)\u00A0%s ", // 00A0 = non-breaking space
 			i+1,
 			choice,
 		)

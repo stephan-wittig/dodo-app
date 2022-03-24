@@ -1,5 +1,11 @@
 package models
 
+import (
+	"bytes"
+	"stephan-wittig/dodo/utils"
+	"text/template"
+)
+
 // Document is the result of instanciating a template with a set of variables
 //
 // The actual document ("verbatim") as well as the instructions are included.
@@ -44,5 +50,20 @@ type intermediateSection struct {
 }
 
 func (doc *intermediateDocument) GenerateVerbatim() ([]byte, error) {
-	return []byte{}, nil
+	tmplText, err := utils.OpenFile("../demo", "*.template")
+	if err != nil {
+		return nil, err
+	}
+
+	tmpl, err := template.New("html").Parse(string(tmplText))
+	if err != nil {
+		return nil, err
+	}
+
+	var buffer bytes.Buffer
+	if err := tmpl.Execute(&buffer, doc); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
 }

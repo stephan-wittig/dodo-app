@@ -2,7 +2,6 @@
 package utils
 
 import (
-	"fmt"
 	"regexp"
 )
 
@@ -15,6 +14,5 @@ func TrimNewLines(data []byte) []byte {
 	trimmed := trimNewLineRegexp.ReplaceAll(data, []byte(" "))
 	trimmed = trimAfterBracketsRegexp.ReplaceAll(trimmed, []byte(">"))
 	trimmed = trimBeforeBracketsRegexp.ReplaceAll(trimmed, []byte("<"))
-	fmt.Printf("Trimmed:\n%s\n", trimmed)
 	return trimmed
 }

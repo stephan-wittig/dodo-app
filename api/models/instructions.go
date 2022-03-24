@@ -14,7 +14,7 @@ type InstructionSet struct {
 	TemplateId      string `json:"templateId"`
 	TemplateVersion string `json:"templateVersion"`
 
-	Elements  map[string]bool                `json:"elements"`  // map of section/paragraph keys => bool
+	Elements  map[string]string              `json:"elements"`  // map of section/paragraph keys => label
 	Variables map[string]variableInstruction `json:"variables"` // map of variable keys => variableInstructions
 }
 
@@ -22,9 +22,10 @@ type InstructionSet struct {
 //
 // This is supposed to be used in input prompts, not for evaluating a document
 type variableInstruction struct {
-	Value       []byte         `json:"value,omitempty"`       // Optional in requests. Everything else is optional in responses
-	DataType    string         `json:"dataType,omitempty"`    // "STRING", "CHOICE", or "NUMBER"
-	Description string         `json:"description,omitempty"` // Optional
+	Value       []byte         `json:"value,omitempty"`    // Optional in requests. Everything else is optional in responses
+	DataType    string         `json:"dataType,omitempty"` // "STRING", "CHOICE", or "NUMBER"
+	Label       string         `json:"label,omitempty"`
+	Description string         `json:"description,omitempty"`
 	Min         float64        `json:"min,omitempty"`
 	Max         float64        `json:"max,omitempty"`
 	Step        float64        `json:"step,omitempty"`    // Only relevant for NUMBER
@@ -107,7 +108,7 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 
 	sectionCount := 0
 	for _, section := range tmpl.Sections {
-		if section.Optional && !inst.Elements[section.Key] {
+		if section.Optional && inst.Elements[section.Key] == "" {
 			continue
 		}
 
@@ -123,9 +124,11 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 		paragraphCount := 0
 
 		for _, p := range section.Paragraphs {
-			if p.Optional && !inst.Elements[p.Key] {
+			if p.Optional && inst.Elements[p.Key] == "" {
 				continue
 			}
+
+			paragraphCount++
 
 			copy, err := p.replaceAllVariables(*inst)
 			copy = fmt.Sprintf("%d. %s", paragraphCount, copy)
