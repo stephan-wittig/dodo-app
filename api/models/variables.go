@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -49,21 +48,6 @@ type numberVariable struct {
 	Step float64 `xml:"step,attr"` // Defaults to 1. Step size, eg. 0.01 for currencies
 
 	variable
-}
-
-// choiceVariable represents the choice between multiple options (default) or a list of options
-// that can be toggled, depending on MaxChoices
-type choiceVariable struct {
-	MaxChoices float64        `xml:"maxChoices,attr"` // Optional
-	MinChoices float64        `xml:"minChoices,attr"` // Defaults to 1
-	Options    []choiceOption `xml:"Option"`
-
-	variable
-}
-
-type choiceOption struct {
-	Label string `json:"label,omitempty" xml:"Label,attr"`
-	Value string `json:"value" xml:",chardata"`
 }
 
 // Methods
@@ -120,73 +104,6 @@ func (v numberVariable) Evaluate(value string) (string, error) {
 	}
 
 	return fmt.Sprintf("%f", num), nil
-}
-
-func (v choiceVariable) ToInstructions() variableInstruction {
-	return variableInstruction{
-		DataType:    "CHOICE",
-		Label:       v.Label,
-		Description: v.Description,
-		Min:         v.MinChoices,
-		Max:         v.MaxChoices,
-		Options:     v.Options,
-	}
-}
-
-func (v choiceVariable) GetKey() string {
-	return v.Key
-}
-
-func (v choiceVariable) Evaluate(value string) (string, error) {
-	if value == "" {
-		return "___", nil
-	}
-
-	var choices []int64
-	if err := json.Unmarshal([]byte(value), &choices); err != nil {
-		return "", err
-	}
-
-	choicesVerbatim := []string{}
-	for _, choice := range choices {
-		choicesVerbatim = append(choicesVerbatim, v.Options[choice].Value)
-	}
-
-	sliceLen := len(choices)
-
-	if sliceLen == 1 {
-		return choicesVerbatim[0], nil
-	}
-
-	maxChoiceLen := 0
-
-	for _, choice := range choicesVerbatim {
-		choiceLen := len(choice)
-		if choiceLen > maxChoiceLen {
-			maxChoiceLen = choiceLen
-		}
-	}
-
-	items := ""
-
-	if maxChoiceLen > olThreshhold {
-		for _, choice := range choicesVerbatim {
-			items = items + fmt.Sprintf(
-				"<li>%s</li>\n",
-				choice,
-			)
-		}
-		return fmt.Sprintf("\n<ol>\n%s</ol>\n", items), nil
-	}
-
-	for i, choice := range choicesVerbatim {
-		items = items + fmt.Sprintf(
-			"(%d)\u00A0%s ", // 00A0 = non-breaking space
-			i+1,
-			choice,
-		)
-	}
-	return strings.TrimSpace(items), nil
 }
 
 func replaceVariable(verbatimTemplate string, variable AnyVariable, value string) (string, error) {

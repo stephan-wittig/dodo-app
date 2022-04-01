@@ -18,7 +18,7 @@ type optionalElement struct {
 	Key         string `xml:"key,attr"`
 }
 
-// DocumentTemplate is an internal representation of templates written in 2D2L
+// DocumentTemplate is an internal representation of templates written in DOD
 type DocumentTemplate struct {
 	Id      string `xml:"id,attr"`
 	Version string `xml:"version,attr"` // semver version (Major.Minor.Fix)
@@ -28,14 +28,21 @@ type DocumentTemplate struct {
 	Jurisdiction string `xml:"jurisdiction,attr"`
 	Preambel     string `xml:"Preambel"` // Optional
 
-	Sections []sectionTemplate `xml:"SectionTemplate"`
+	Sections []sectionTemplate `xml:"Section"`
 }
 
 type sectionTemplate struct {
-	Heading  string `xml:"heading,attr"`
-	Preambel string `xml:"Preambel"` // Optional
+	Heading string `xml:"heading,attr"`
 
-	Paragraphs []paragraphTemplate `xml:"ParagraphTemplate"`
+	Subsections []subsectionTemplate `xml:"Subsetion"`
+
+	optionalElement
+}
+
+type subsectionTemplate struct {
+	Label      string              `xml:"label,attr"` // Mandatory for optional Subsections
+	Preambel   string              `xml:"Preambel"`   // Optional
+	Paragraphs []paragraphTemplate `xml:"Paragraph"`
 
 	optionalElement
 }
@@ -46,16 +53,15 @@ type paragraphTemplate struct {
 
 	StringVariables []stringVariable `xml:"StringVariable"`
 	NumberVariables []numberVariable `xml:"NumberVariable"`
-	ChoiceVariables []choiceVariable `xml:"ChoiceVariable"`
 
 	optionalElement
 }
 
 // Constructors
 
-// ParseDocumentTemplate reads Dod data to construct a DocumentTemplate
+// ParseDocumentTemplate reads DOD data to construct a DocumentTemplate
 //
-// The Dod XML Schema is used to validate the input.
+// The DOD XML Schema is used to validate the input.
 // On error, this returns the error AND a DocumentTemplate which might be invalid
 func ParseDodDocumentTemplate(data []byte) (*DocumentTemplate, error) {
 	newTemplate := DocumentTemplate{}
@@ -77,26 +83,26 @@ func (tmpl *DocumentTemplate) CreateInstructionSet() InstructionSet {
 			elements[sec.Key] = sec.Heading
 		}
 
-		for _, par := range sec.Paragraphs {
-			if par.Optional {
-				elements[par.Key] = par.Label
+		for _, sub := range sec.Subsections {
+			if sub.Optional {
+				elements[sub.Key] = sub.Label
 			}
 
-			if par.StringVariables != nil {
-				for _, v := range par.StringVariables {
-					variables[v.GetKey()] = v.ToInstructions()
+			for _, par := range sub.Paragraphs {
+				if par.Optional {
+					elements[par.Key] = par.Label
 				}
-			}
 
-			if par.NumberVariables != nil {
-				for _, v := range par.NumberVariables {
-					variables[v.GetKey()] = v.ToInstructions()
+				if par.StringVariables != nil {
+					for _, v := range par.StringVariables {
+						variables[v.GetKey()] = v.ToInstructions()
+					}
 				}
-			}
 
-			if par.ChoiceVariables != nil {
-				for _, v := range par.ChoiceVariables {
-					variables[v.GetKey()] = v.ToInstructions()
+				if par.NumberVariables != nil {
+					for _, v := range par.NumberVariables {
+						variables[v.GetKey()] = v.ToInstructions()
+					}
 				}
 			}
 		}
@@ -125,15 +131,6 @@ func (p *paragraphTemplate) replaceAllVariables(i InstructionSet) (string, error
 	}
 
 	for _, v := range p.NumberVariables {
-		ins, _ := i.Variables[v.Key]
-		newCopy, err := replaceVariable(copy, v, ins.Value)
-		if err != nil {
-			return "", err
-		}
-		copy = newCopy
-	}
-
-	for _, v := range p.ChoiceVariables {
 		ins, _ := i.Variables[v.Key]
 		newCopy, err := replaceVariable(copy, v, ins.Value)
 		if err != nil {

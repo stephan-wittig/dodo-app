@@ -27,12 +27,14 @@
       <h2 class="section-title">
         {{.Heading}}
       </h2>
-      {{with .Preambel}}<p class="section-preambel">
-        {{ . }}
-      </p>{{end}}
-      {{range .Paragraphs}}<p class="paragraph">
-        {{ . }}
-      </p>{{end}}
+      {{range .Subsections}}<div class="subsection">
+        {{with .Preambel}}<p class="subsection-preambel">
+          {{ . }}
+        </p>{{end}}
+        {{range .Paragraphs}}<p class="paragraph">
+          {{ . }}
+        </p>{{end}}
+      </div>{{end}}
     </section>{{end}}
 	</body>
 </html>

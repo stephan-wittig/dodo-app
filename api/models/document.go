@@ -41,11 +41,18 @@ type intermediateDocument struct {
 	Sections []intermediateSection
 }
 
-// intermediatSection is an intermediate step between sectionTeomplate and document
+// intermediatSection is an intermediate step between sectionTemplate and document
 //
 // Variables are already evaluated here
 type intermediateSection struct {
-	Heading    string
+	Heading     string
+	Subsections []intermediateSubsection
+}
+
+// intermediatSection is an intermediate step between subsectionTemplate and document
+//
+// Variables are already evaluated here
+type intermediateSubsection struct {
 	Preambel   string
 	Paragraphs []string
 }
