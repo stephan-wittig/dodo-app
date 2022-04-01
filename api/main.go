@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"stephan-wittig/dodo/models"
-	"stephan-wittig/dodo/utils"
+
+	"github.com/stephan-wittig/dodo/models"
+	"github.com/stephan-wittig/dodo/utils"
 )
 
 func main() {
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	if selection == 2 {
-		instructionsData, err := utils.OpenFile("../demo", "input.json")
+		instructionsData, err := utils.OpenFile("../demo", "input_*.json")
 		if err != nil {
 			log.Fatal(err)
 		}

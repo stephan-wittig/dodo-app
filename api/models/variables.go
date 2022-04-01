@@ -26,7 +26,7 @@ type AnyVariable interface {
 	ToInstructions() variableInstruction
 	GetKey() string
 	// Evaluates turns the input data into a string fitting the format. HTML is escaped here
-	Evaluate([]byte) (string, error)
+	Evaluate(string) (string, error)
 }
 
 // variable composes the common attributes for all variables
@@ -82,12 +82,12 @@ func (v stringVariable) GetKey() string {
 	return v.Key
 }
 
-func (v stringVariable) Evaluate(value []byte) (string, error) {
-	if value == nil {
+func (v stringVariable) Evaluate(value string) (string, error) {
+	if value == "" {
 		return "___", nil
 	}
 
-	return template.HTMLEscapeString(string(value)), nil
+	return template.HTMLEscapeString(value), nil
 }
 
 func (v numberVariable) ToInstructions() variableInstruction {
@@ -105,12 +105,12 @@ func (v numberVariable) GetKey() string {
 	return v.Key
 }
 
-func (v numberVariable) Evaluate(value []byte) (string, error) {
-	if value == nil {
+func (v numberVariable) Evaluate(value string) (string, error) {
+	if value == "" {
 		return "___", nil
 	}
 
-	num, err := strconv.ParseFloat(string(value), 64)
+	num, err := strconv.ParseFloat(value, 64)
 	if err != nil {
 		return "", err
 	}
@@ -137,13 +137,13 @@ func (v choiceVariable) GetKey() string {
 	return v.Key
 }
 
-func (v choiceVariable) Evaluate(value []byte) (string, error) {
-	if value == nil {
+func (v choiceVariable) Evaluate(value string) (string, error) {
+	if value == "" {
 		return "___", nil
 	}
 
 	var choices []int64
-	if err := json.Unmarshal(value, &choices); err != nil {
+	if err := json.Unmarshal([]byte(value), &choices); err != nil {
 		return "", err
 	}
 
@@ -189,7 +189,7 @@ func (v choiceVariable) Evaluate(value []byte) (string, error) {
 	return strings.TrimSpace(items), nil
 }
 
-func replaceVariable(verbatimTemplate string, variable AnyVariable, value []byte) (string, error) {
+func replaceVariable(verbatimTemplate string, variable AnyVariable, value string) (string, error) {
 	new, err := variable.Evaluate(value)
 	if err != nil {
 		return "", err

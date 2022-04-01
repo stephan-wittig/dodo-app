@@ -2,8 +2,9 @@ package models
 
 import (
 	"bytes"
-	"stephan-wittig/dodo/utils"
 	"text/template"
+
+	"github.com/stephan-wittig/dodo/utils"
 )
 
 // Document is the result of instanciating a template with a set of variables

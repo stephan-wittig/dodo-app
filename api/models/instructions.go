@@ -22,7 +22,7 @@ type InstructionSet struct {
 //
 // This is supposed to be used in input prompts, not for evaluating a document
 type variableInstruction struct {
-	Value       []byte         `json:"value,omitempty"`    // Optional in requests. Everything else is optional in responses
+	Value       string         `json:"value,omitempty"`    // Optional in requests. Everything else is optional in responses
 	DataType    string         `json:"dataType,omitempty"` // "STRING", "CHOICE", or "NUMBER"
 	Label       string         `json:"label,omitempty"`
 	Description string         `json:"description,omitempty"`

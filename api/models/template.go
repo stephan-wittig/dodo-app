@@ -2,7 +2,8 @@ package models
 
 import (
 	"encoding/xml"
-	"stephan-wittig/dodo/utils"
+
+	"github.com/stephan-wittig/dodo/utils"
 )
 
 // Global variable holding the template used for everything

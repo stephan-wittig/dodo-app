@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<DocumentTemplate
+  version="0.1.1"
+  id="000"
+  jurisdiction="GB"
+  name="Maternity, Adoption, Paternity and Parental Leave Policy "
+  description="Company-wide policy outlining the conditions for parental leaves."
+>
+  <Preambel>
+    This policy constitutes an addendum to the employment contract between ${{company-full-name}}
+    (hereafter "${{company-short-name}}") and its employees. It applies from ${{active-from}}.
+  </Preambel>
+
+  <SectionTemplate
+    heading="Who is covered by this policy?"
+    optional="false"
+  >
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        For maternity / adoption leave and pay: any employee of the organisation who has become pregnant or who has been
+        matched with a child for adoption.
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        For shared parental leave: the partner of any such employee whether or not they work for this organisation
+        (subject to certain qualifying and earnings criteria), or an employee whose partner has become pregnant or been
+        matched with a child for adoption.
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        For paternity leave and pay: any employee of the organisation whose partner has become pregnant or been matched
+        with a child for adoption.
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        For unpaid parental leave: any employee with at least one years' service who has a child under 18 years old. 
+      </Verbatim>
+    </ParagraphTemplate>
+  </SectionTemplate>
+
+  <SectionTemplate
+    heading="What am I entitled to as an employee who is pregnant or adopting?"
+    optional="false"
+  >
+    <ParagraphTemplate
+      optional="false"
+    >
+      <NumberVariable
+        min="6"
+        max="52"
+        key="leave-period"
+        label="Maximum period of leave"
+      />
+      <Verbatim>
+        You will be entitled to take up to ${leave-period} maternity leave if you want to,
+        irrespective of your length of service or earnings with the organisation. 
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <NumberVariable
+        min="6"
+        max="52"
+        key="adoption-leave-period"
+        label="Maximum period of leave for adoptions"
+      />
+      <Verbatim>
+        You will be entitled to take up to ${adoption-leave-period} adoption leave if you want to,
+        irrespective of your length of service or earnings with the organisation. 
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <NumberVariable
+        min="6"
+        max="52"
+        key="high-pay-period"
+        label="Period for higher pay"
+        description="Period during which parents will receive the higher pay. 6 weeks in the statutory legal minimum."
+      />
+      <NumberVariable
+        min="90"
+        max="100"
+        key="high-pay-percentage"
+        label="Higher pay during first weeks"
+        description="This is the percentage fo their normal salary that parents will receive during the first weeks. 
+                     The legal minimum is 90%."
+      />
+      <NumberVariable
+        min="0"
+        max="46"
+        key="low-pay-period"
+        label="Period for lower pay"
+        description="Period during which parents will receive the statuory pay. This must be the remainder of the leave period"
+      />
+      <Verbatim>
+        If 15 weeks before the expected birth or adoption you have been employed by us continuously for at least 26 weeks,
+        and your average weekly earnings are at least equal to the lower earnings limit for National Insurance contributions
+        (see rates here: 
+        <a href="https://https://www.gov.uk/government/publications/rates-and-allowances-national-insurance-contributions/rates-and-allowances-national-insurance-contributions">
+          www.gov.uk/government/publications/rates-and-allowances-national-insurance-contributions/rates-and-allowances-national-insurance-contributions
+        </a>
+        ) 
+        we will pay you the following:
+
+          1) For the first ${high-pay-period} weeks: ${high-pay-percentage}% of weekly earnings.
+
+          2) For the next ${low-pay-period} weeks: Statutory Maternity Pay (“SMP”), which consists of: the lower of
+            a) the statutory rate of pay set by the Government each tax year and
+            b) 90 per cent of your average weekly earnings for the final 33 weeks. 
+      </Verbatim>
+    </ParagraphTemplate>
+  </SectionTemplate>
+
+  <SectionTemplate
+    heading="What am I entitled to as a father to be?"
+    optional="false"
+  >
+    <ParagraphTemplate
+      optional="true"
+      key="basic-paternal-leave-paragraph"
+      label="Paragraph recounting the statutory parental leave terms"
+      description="Paternal leave clause reflecting the staturoy minimum pay. Use this or the next paragraph."
+    >
+      <NumberVariable
+        min="2"
+        max="52"
+        key="paternal-leave-period"
+        label="Maximum period of leave for fathers"
+      />
+      <Verbatim>
+        If 15 weeks before the expected birth or adoption you have been employed by us continuously
+        for at least 26 weeks you will be entitled to: ${paternal-leave-period} weeks paternity leave at a rate 
+        equivalent to the basic SMP.
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="true"
+      key="extra-paternal-leave-paragraph"
+      label="Paragraph granting additional parental leave"
+      description="Paternal leave clause granting more than minimum pay."
+    >
+      <NumberVariable
+        min="2"
+        max="52"
+        key="paternal-leave-period"
+        label="Maximum period of leave for fathers"
+      />
+      <NumberVariable
+        min="60"
+        max="100"
+        key="paternal-pay-percentage"
+        label="Percentage of pay that will be paid during paternal leave."
+      />
+      <Verbatim>
+        If 15 weeks before the expected birth or adoption you have been employed by us continuously
+        for at least 26 weeks you will be entitled to: ${paternal-leave-period} weeks paternity leave at a rate
+        equivalent to ${paternal-pay-percentage}% of weekly earnings.
+      </Verbatim>
+    </ParagraphTemplate>
+  </SectionTemplate>
+
+  <SectionTemplate
+    heading="What am I entitled to with a child under 18?"
+    optional="true"
+    key="older-child-leave-section"
+    description="Additional leave can be taken by parents of children of any age. This section reminds them of their statutory rights."
+  >
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        After one year service you can take up to 18 weeks unpaid parental leave for any child that is under 18 years child. 
+      </Verbatim>
+    </ParagraphTemplate>
+    <ParagraphTemplate
+      optional="false"
+    >
+      <Verbatim>
+        This allowance applies to each of your children but can only be taken in blocks of up to 4 weeks per year.
+      </Verbatim>
+    </ParagraphTemplate>
+  </SectionTemplate>
+
+</DocumentTemplate>
