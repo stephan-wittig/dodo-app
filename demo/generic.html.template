@@ -5,14 +5,15 @@
 		<title>{{.Name}}</title>
     <style type = "text/css">
         body {
-          margin: 2rem;
+          margin: 2.5cm;
           font-family: Arial, Helvetica, sans-serif;
         }
         .document-title {
           font-family: "Times New Roman", Times, serif;
         }
-        .subsection-preambel { 
-          font-weight: bold;
+        .document-title, .document-preambel {
+          text-align: center;
+          margin: 0 16%;
         }
         .document-preambel { 
           font-size: 1.2rem;
@@ -24,20 +25,20 @@
 	</head>
 	<body>
     <h1 class="document-title">{{.Name}}</h1>
-    {{with .Preambel}}<p class="document-preambel">
+    {{with .Preambel}}<div class="document-preambel">
       {{ . }}
-    </p>{{end}}
+    </div>{{end}}
     {{range .Sections}}<section class="section">
       <h2 class="section-title">
         {{.Heading}}
       </h2>
       {{range .Subsections}}<div class="subsection">
-        {{with .Preambel}}<p class="subsection-preambel">
+        {{with .Preambel}}<div class="subsection-preambel">
           {{ . }}
-        </p>{{end}}
-        {{range .Paragraphs}}<p class="paragraph">
+        </div>{{end}}
+        {{range .Paragraphs}}<div class="paragraph">
           {{ . }}
-        </p>{{end}}
+        </div>{{end}}
       </div>{{end}}
     </section>{{end}}
 	</body>

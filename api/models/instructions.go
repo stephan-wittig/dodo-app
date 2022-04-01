@@ -3,8 +3,9 @@ package models
 import (
 	"crypto/md5"
 	"encoding/json"
-	"fmt"
-	"text/template"
+	"log"
+
+	"github.com/stephan-wittig/dodo/utils"
 )
 
 // InstructionSet is a request for or response with variable values
@@ -99,9 +100,14 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 		return intermediateDocument{}, err
 	}
 
+	preambelHtml, err := utils.Md2Html(replaceGlobalVariables(tmpl.Preambel))
+	if err != nil {
+		return intermediateDocument{}, err
+	}
+
 	doc := intermediateDocument{
 		Name:     tmpl.Name,
-		Preambel: template.HTMLEscapeString(replaceGlobalVariables(tmpl.Preambel)),
+		Preambel: preambelHtml,
 		Sections: []intermediateSection{},
 	}
 
@@ -114,9 +120,14 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 		sectionCount++
 		paragraphCount := 0
 
+		headingHtml, err := utils.Md2Html(section.Heading)
+		if err != nil {
+			return intermediateDocument{}, err
+		}
+
 		sec := intermediateSection{
 			// TODO: use roman numerals here
-			Heading:     fmt.Sprintf("%d. %s", sectionCount, template.HTMLEscapeString(section.Heading)),
+			Heading:     headingHtml,
 			Subsections: []intermediateSubsection{},
 		}
 
@@ -125,8 +136,13 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 				continue
 			}
 
+			subPreambelHtml, err := utils.Md2Html(subsection.Preambel)
+			if err != nil {
+				return intermediateDocument{}, err
+			}
+
 			sub := intermediateSubsection{
-				Preambel:   subsection.Preambel,
+				Preambel:   subPreambelHtml,
 				Paragraphs: []string{},
 			}
 
@@ -138,11 +154,19 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 				paragraphCount++
 
 				copy, err := p.replaceAllVariables(*inst)
-				copy = fmt.Sprintf("%d. %s", paragraphCount, copy)
 				if err != nil {
 					return intermediateDocument{}, err
 				}
-				sub.Paragraphs = append(sub.Paragraphs, copy)
+
+				copyHtml, err := utils.Md2Html(copy)
+
+				log.Printf("MD: %s", copy)
+				log.Printf("Html: %s", copyHtml)
+
+				if err != nil {
+					return intermediateDocument{}, err
+				}
+				sub.Paragraphs = append(sub.Paragraphs, copyHtml)
 			}
 
 			sec.Subsections = append(sec.Subsections, sub)
