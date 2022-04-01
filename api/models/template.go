@@ -34,7 +34,7 @@ type DocumentTemplate struct {
 type sectionTemplate struct {
 	Heading string `xml:"heading,attr"`
 
-	Subsections []subsectionTemplate `xml:"Subsetion"`
+	Subsections []subsectionTemplate `xml:"Subsection"`
 
 	optionalElement
 }
