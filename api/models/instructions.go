@@ -3,7 +3,6 @@ package models
 import (
 	"crypto/md5"
 	"encoding/json"
-	"log"
 
 	"github.com/stephan-wittig/dodo/utils"
 )
@@ -159,9 +158,6 @@ func (inst *InstructionSet) createIntermediateDocument() (intermediateDocument, 
 				}
 
 				copyHtml, err := utils.Md2Html(copy)
-
-				log.Printf("MD: %s", copy)
-				log.Printf("Html: %s", copyHtml)
 
 				if err != nil {
 					return intermediateDocument{}, err

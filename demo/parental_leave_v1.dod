@@ -56,7 +56,7 @@ If you are an employee who is pregnant or adopting:
           label="Maximum period of leave"
         />
         <Verbatim>
-You will be entitled to take up to ${leave-period} maternity leave if you want to,
+You will be entitled to take up to ${leave-period} weeks of maternity leave if you want to,
 irrespective of your length of service or earnings with the organisation. 
         </Verbatim>
       </Paragraph>
@@ -70,7 +70,7 @@ irrespective of your length of service or earnings with the organisation.
           label="Maximum period of leave for adoptions"
         />
         <Verbatim>
-You will be entitled to take up to ${adoption-leave-period} adoption leave if you want to,
+You will be entitled to take up to ${adoption-leave-period} weeks of adoption leave if you want to,
 irrespective of your length of service or earnings with the organisation.
         </Verbatim>
       </Paragraph>
